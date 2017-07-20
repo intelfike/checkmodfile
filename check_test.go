@@ -12,3 +12,18 @@ func TestCheck(t *testing.T) {
 	}
 	fmt.Println(f.IsLatest())
 }
+
+func TestGetLatest(t *testing.T) {
+	f, err := RegistFile("check_test.go")
+	if err != nil {
+		fmt.Println(err)
+	}
+	for n := 0; n < 100; n++ {
+		text, err := f.GetLatest()
+		if err != nil {
+			continue
+		}
+		fmt.Printf("%s", text[:10])
+	}
+
+}

@@ -2,6 +2,8 @@
 package checkmodfile
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"time"
 )
@@ -9,6 +11,7 @@ import (
 type File struct {
 	Name    string
 	ModTime time.Time
+	Body    []byte
 }
 
 // 管理対象に登録
@@ -19,7 +22,23 @@ func RegistFile(filename string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = f.UpdateBody()
+	if err != nil {
+		return nil, err
+	}
 	return f, nil
+}
+
+// ファイル内容を取り出す
+func (f *File) UpdateBody() error {
+	fr, err := os.Open(f.Name)
+	if err != nil {
+		return err
+	}
+	b := new(bytes.Buffer)
+	io.Copy(b, fr)
+	f.Body = b.Bytes()
+	return nil
 }
 
 // ModTimeを新しい物に更新
@@ -39,4 +58,19 @@ func (f *File) IsLatest() (bool, error) {
 		return false, err
 	}
 	return f.ModTime == fInfo.ModTime(), nil
+}
+
+func (f *File) GetLatest() ([]byte, error) {
+	islatest, err := f.IsLatest()
+	if err != nil {
+		return nil, err
+	}
+	if islatest {
+		return f.Body, nil
+	}
+	err = f.UpdateBody()
+	if err != nil {
+		return nil, err
+	}
+	return f.Body, nil
 }
