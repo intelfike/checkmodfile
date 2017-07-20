@@ -18,11 +18,7 @@ type File struct {
 func RegistFile(filename string) (*File, error) {
 	f := new(File)
 	f.Name = filename
-	err := f.UpdateMod()
-	if err != nil {
-		return nil, err
-	}
-	err = f.UpdateBody()
+	err := f.Update()
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +31,7 @@ func (f *File) UpdateBody() error {
 	if err != nil {
 		return err
 	}
+	defer fr.Close()
 	b := new(bytes.Buffer)
 	io.Copy(b, fr)
 	f.Body = b.Bytes()
@@ -51,6 +48,20 @@ func (f *File) UpdateMod() error {
 	return nil
 }
 
+// 両方アップデート
+func (f *File) Update() error {
+	err := f.UpdateMod()
+	if err != nil {
+		return err
+	}
+	err = f.UpdateBody()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 //
 func (f *File) IsLatest() (bool, error) {
 	fInfo, err := os.Stat(f.Name)
@@ -60,6 +71,7 @@ func (f *File) IsLatest() (bool, error) {
 	return f.ModTime == fInfo.ModTime(), nil
 }
 
+// ファイルの最新の中身をとる
 func (f *File) GetLatest() ([]byte, error) {
 	islatest, err := f.IsLatest()
 	if err != nil {
@@ -68,7 +80,7 @@ func (f *File) GetLatest() ([]byte, error) {
 	if islatest {
 		return f.Body, nil
 	}
-	err = f.UpdateBody()
+	err = f.Update()
 	if err != nil {
 		return nil, err
 	}
