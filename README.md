@@ -15,7 +15,7 @@ func (f *File) Update() error<br><br>
 func (f *File) UpdateBytes() error<br><br>
 - 登録されたファイルの更新日時を更新する<br>
 func (f *File) UpdateMod() error<br><br>
-- 渡されたwriterに書き出す。更新されていない場合はメモリ上に保存されたものを取得<br>
+- 渡されたwriterに書き出す。更新されていない場合はメモリ上に保存されたものを書き出す<br>
 func (f *File) WriteTo(io.Writer) error <br><br>
 
 # Example
@@ -26,7 +26,7 @@ ab -n 10000 -c 10 localhost
 ```
 
 ## キャッシュしない場合 (約14000 [#/sec])
-下２つと比べると18%ほど低速です。
+下２つと比べると2割ほど低速です。
 ```
 http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	// HTMLを返す
