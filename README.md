@@ -1,18 +1,19 @@
 # checkmodfile is golang package
 
 ## Type, Function and Method
+- 型
 type File struct{ ... }
-### 新しいファイルを管理対象に登録
+- 新しいファイルを管理対象に登録
     func RegistFile(filename string) (*File, error)
-### ファイル内容を取得。更新されてない場合はメモリ上に保存されたものを取得
+- ファイル内容を取得。更新されてない場合はメモリ上に保存されたものを取得
 func (f *File) GetLatest() ([]byte, error)
-### 登録したファイルが最新か判定する
+- 登録したファイルが最新か判定する
 func (f *File) IsLatest() (bool, error)
-### 登録されたファイルの内容と更新日付を更新する
+- 登録されたファイルの内容と更新日付を更新する
 func (f *File) Update() error
-### 登録されたファイルの内容を更新する
+- 登録されたファイルの内容を更新する
 func (f *File) UpdateBody() error
-### 登録されたファイルの更新日時を更新する
+- 登録されたファイルの更新日時を更新する
 func (f *File) UpdateMod() error
 
 ## Example
