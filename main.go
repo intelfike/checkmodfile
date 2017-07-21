@@ -62,7 +62,7 @@ func (f *File) Update() error {
 	return nil
 }
 
-//
+// 登録されたファイルが最新版かどうか判定する
 func (f *File) IsLatest() (bool, error) {
 	fInfo, err := os.Stat(f.Name)
 	if err != nil {
