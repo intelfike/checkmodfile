@@ -1,29 +1,29 @@
 # checkmodfile is golang package
 
-## Type, Function and Method
-- 型
+# Type, Function and Method
+- 型<br>
 type File struct{ ... }
-- 新しいファイルを管理対象に登録
-    func RegistFile(filename string) (*File, error)
-- ファイル内容を取得。更新されてない場合はメモリ上に保存されたものを取得
+- 新しいファイルを管理対象に登録<br>
+func RegistFile(filename string) (*File, error)
+- ファイル内容を取得。更新されてない場合はメモリ上に保存されたものを取得<br>
 func (f *File) GetLatest() ([]byte, error)
-- 登録したファイルが最新か判定する
+- 登録したファイルが最新か判定する<br>
 func (f *File) IsLatest() (bool, error)
-- 登録されたファイルの内容と更新日付を更新する
+- 登録されたファイルの内容と更新日付を更新する<br>
 func (f *File) Update() error
-- 登録されたファイルの内容を更新する
+- 登録されたファイルの内容を更新する<br>
 func (f *File) UpdateBody() error
-- 登録されたファイルの更新日時を更新する
+- 登録されたファイルの更新日時を更新する<br>
 func (f *File) UpdateMod() error
 
-## Example
+# Example
 HTTPサーバーをサンプルに用います。<br>
 ベンチマークコマンドは以下のものを用います
 ```
 ab -n 10000 -c 10 localhost
 ```
 
-### キャッシュしない場合 (約14000 [#/sec])
+## キャッシュしない場合 (約14000 [#/sec])
 下２つと比べると18%ほど低速です。
 ```
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +39,7 @@ ab -n 10000 -c 10 localhost
 		}
 	})
 ```
-### 自力でキャッシュを実装する場合 (約 17000 [#/sec])
+## 自力でキャッシュを実装する場合 (約 17000 [#/sec])
 高速ですが、エラー処理を毎度書くとなかなか行数が長くなります。
 ```
 	// キャッシュしたいファイル
@@ -88,7 +88,7 @@ ab -n 10000 -c 10 localhost
 	})
 ```
 
-### このパッケージを使った場合 (約 17000 [#/sec])
+## このパッケージを使った場合 (約 17000 [#/sec])
 単純さと高速性を兼ね備えています。
 ```
 	// ファイルを登録
@@ -111,7 +111,7 @@ ab -n 10000 -c 10 localhost
 	})
 ```
 
-## License
+# License
 MIT
 
-&copy;2017- intelfike
+&copy;2017- intelfike<br>
