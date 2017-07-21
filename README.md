@@ -2,19 +2,19 @@
 
 # Type, Function and Method
 - 型<br>
-type File struct{ ... }
+type File struct{ ... }<br>
 - 新しいファイルを管理対象に登録<br>
-func RegistFile(filename string) (*File, error)
+func RegistFile(filename string) (*File, error)<br>
 - ファイル内容を取得。更新されてない場合はメモリ上に保存されたものを取得<br>
-func (f *File) GetLatest() ([]byte, error)
+func (f *File) GetLatest() ([]byte, error)<br>
 - 登録したファイルが最新か判定する<br>
-func (f *File) IsLatest() (bool, error)
+func (f *File) IsLatest() (bool, error)<br>
 - 登録されたファイルの内容と更新日付を更新する<br>
-func (f *File) Update() error
+func (f *File) Update() error<br>
 - 登録されたファイルの内容を更新する<br>
-func (f *File) UpdateBody() error
+func (f *File) UpdateBody() error<br>
 - 登録されたファイルの更新日時を更新する<br>
-func (f *File) UpdateMod() error
+func (f *File) UpdateMod() error<br>
 
 # Example
 HTTPサーバーをサンプルに用います。<br>
@@ -114,4 +114,4 @@ ab -n 10000 -c 10 localhost
 # License
 MIT
 
-&copy;2017- intelfike<br>
+&copy;2017- intelfike<br><br>
