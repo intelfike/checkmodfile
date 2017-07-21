@@ -72,7 +72,7 @@ func (f *File) IsLatest() (bool, error) {
 }
 
 // ファイルの最新の中身をとる
-func (f *File) GetLatest() ([]byte, error) {
+func (f *File) GetBytes() ([]byte, error) {
 	islatest, err := f.IsLatest()
 	if err != nil {
 		return nil, err
@@ -85,4 +85,25 @@ func (f *File) GetLatest() ([]byte, error) {
 		return nil, err
 	}
 	return f.Body, nil
+}
+
+func (f *File) WriteTo(w io.Writer) error {
+	latest, err := f.IsLatest()
+	if err != nil {
+		return err
+	}
+	if latest {
+		w.Write(f.Body)
+		return nil
+	}
+	b := new(bytes.Buffer)
+	mw := io.MultiWriter(w, b)
+	fr, err := os.Open(f.Name)
+	if err != nil {
+		return err
+	}
+	defer fr.Close()
+	io.Copy(mw, fr)
+	f.Body = b.Bytes()
+	return nil
 }
