@@ -25,6 +25,18 @@ func RegistFile(filename string) (*File, error) {
 	return f, nil
 }
 
+func RegistFiles(filenames ...string) (map[string]*File, error) {
+	files := map[string]*File{}
+	for _, v := range filenames {
+		var err error
+		files[v], err = RegistFile(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return files, nil
+}
+
 // ファイル内容を取り出す
 func (f *File) UpdateBody() error {
 	fr, err := os.Open(f.Name)
