@@ -12,6 +12,7 @@ type File struct {
 	Name    string
 	ModTime time.Time
 	Body    []byte
+	master  []byte
 }
 
 // 管理対象に登録
@@ -37,7 +38,7 @@ func RegistFiles(filenames ...string) (map[string]*File, error) {
 	return files, nil
 }
 
-// ファイル内容を取り出す
+// 現在のファイル内容を取り出す
 func (f *File) UpdateBody() error {
 	fr, err := os.Open(f.Name)
 	if err != nil {
@@ -47,6 +48,8 @@ func (f *File) UpdateBody() error {
 	b := new(bytes.Buffer)
 	io.Copy(b, fr)
 	f.Body = b.Bytes()
+	f.master = make([]byte, len(f.Body))
+	copy(f.master, f.Body)
 	return nil
 }
 
@@ -60,7 +63,7 @@ func (f *File) UpdateMod() error {
 	return nil
 }
 
-// 両方アップデート
+// ファイル内容と更新日時の両方更新
 func (f *File) Update() error {
 	err := f.UpdateMod()
 	if err != nil {
@@ -90,13 +93,13 @@ func (f *File) GetBytes() ([]byte, error) {
 		return nil, err
 	}
 	if islatest {
-		return f.Body, nil
+		return f.master, nil
 	}
 	err = f.Update()
 	if err != nil {
 		return nil, err
 	}
-	return f.Body, nil
+	return f.master, nil
 }
 
 func (f *File) WriteTo(w io.Writer) error {
@@ -117,5 +120,34 @@ func (f *File) WriteTo(w io.Writer) error {
 	defer fr.Close()
 	io.Copy(mw, fr)
 	f.Body = b.Bytes()
+	f.master = make([]byte, len(f.Body))
+	copy(f.master, f.Body)
 	return nil
+}
+
+// File.Bodyを保存する
+func (f *File) Save() error {
+	file, err := os.Create(f.Name)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	file.Write(f.master)
+	return nil
+}
+
+func (f *File) LatestBody() bool {
+	return string(f.Body) == string(f.master)
+}
+
+// bodyを確定して保存可能に
+func (f *File) CommitBody() {
+	f.master = make([]byte, len(f.Body))
+	copy(f.master, f.Body)
+}
+
+// bodyを前のUpdateまで巻き戻す
+func (f *File) RollBackBody() {
+	f.Body = make([]byte, len(f.master))
+	copy(f.Body, f.master)
 }
