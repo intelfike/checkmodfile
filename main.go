@@ -11,8 +11,8 @@ import (
 type File struct {
 	Name    string
 	ModTime time.Time
+	head    os.FileInfo
 	Body    []byte
-	master  []byte
 }
 
 // 管理対象に登録
@@ -26,18 +26,6 @@ func RegistFile(filename string) (*File, error) {
 	return f, nil
 }
 
-func RegistFiles(filenames ...string) (map[string]*File, error) {
-	files := map[string]*File{}
-	for _, v := range filenames {
-		var err error
-		files[v], err = RegistFile(v)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return files, nil
-}
-
 // 現在のファイル内容を取り出す
 func (f *File) UpdateBody() error {
 	fr, err := os.Open(f.Name)
@@ -48,24 +36,22 @@ func (f *File) UpdateBody() error {
 	b := new(bytes.Buffer)
 	io.Copy(b, fr)
 	f.Body = b.Bytes()
-	f.master = make([]byte, len(f.Body))
-	copy(f.master, f.Body)
 	return nil
 }
 
 // ModTimeを新しい物に更新
-func (f *File) UpdateMod() error {
+func (f *File) UpdateHead() error {
 	fInfo, err := os.Stat(f.Name)
 	if err != nil {
 		return err
 	}
-	f.ModTime = fInfo.ModTime()
+	f.head = fInfo
 	return nil
 }
 
 // ファイル内容と更新日時の両方更新
 func (f *File) Update() error {
-	err := f.UpdateMod()
+	err := f.UpdateHead()
 	if err != nil {
 		return err
 	}
@@ -83,7 +69,7 @@ func (f *File) IsLatest() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return f.ModTime == fInfo.ModTime(), nil
+	return f.head.ModTime() == fInfo.ModTime(), nil
 }
 
 // ファイルの最新の中身をとる
@@ -93,13 +79,13 @@ func (f *File) GetBytes() ([]byte, error) {
 		return nil, err
 	}
 	if islatest {
-		return f.master, nil
+		return f.Body, nil
 	}
 	err = f.Update()
 	if err != nil {
 		return nil, err
 	}
-	return f.master, nil
+	return f.Body, nil
 }
 
 func (f *File) WriteTo(w io.Writer) error {
@@ -120,34 +106,15 @@ func (f *File) WriteTo(w io.Writer) error {
 	defer fr.Close()
 	io.Copy(mw, fr)
 	f.Body = b.Bytes()
-	f.master = make([]byte, len(f.Body))
-	copy(f.master, f.Body)
 	return nil
 }
 
-// File.Bodyを保存する
-func (f *File) Save() error {
+func (f *File) Save(b []byte) error {
 	file, err := os.Create(f.Name)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	file.Write(f.master)
+	file.Write(b)
 	return nil
-}
-
-func (f *File) LatestBody() bool {
-	return string(f.Body) == string(f.master)
-}
-
-// bodyを確定して保存可能に
-func (f *File) CommitBody() {
-	f.master = make([]byte, len(f.Body))
-	copy(f.master, f.Body)
-}
-
-// bodyを前のUpdateまで巻き戻す
-func (f *File) RollBackBody() {
-	f.Body = make([]byte, len(f.master))
-	copy(f.Body, f.master)
 }
